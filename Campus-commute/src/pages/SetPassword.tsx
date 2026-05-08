@@ -8,6 +8,8 @@ import BackButton from "@/components/BackButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+
 const passwordSchema = z.string().min(8, "Password must be at least 8 characters");
 
 const SetPassword = () => {
@@ -40,69 +42,57 @@ const SetPassword = () => {
   };
 
   const handleSignUp = async () => {
-    if (!validateForm()) return;
+  if (!validateForm()) return;
 
-    // Save account to localStorage
-    const registeredAccounts = JSON.parse(
-      localStorage.getItem("campus-commute-accounts") || "[]"
-    );
+  setIsLoading(true);
 
-    // Check if account already exists
-    const accountExists = registeredAccounts.some(
-      (acc: any) => acc.email === pendingEmail && acc.role === pendingRole
-    );
+  try {
+    const response = await fetch(`${BACKEND_URL}/user/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        email: pendingEmail,
+        password: newPassword,
+        role: pendingRole,
+        fullName: pendingUserData.fullName,
+        yearBatch: pendingUserData.yearBatch,
+        routeNo: pendingUserData.routeNo,
+        timing: pendingUserData.timing,
+      }),
+    });
 
-    if (accountExists) {
-      toast({
-        title: "Account Already Exists",
-        description: "This email is already registered",
-        variant: "destructive",
-      });
-      return;
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || data.message || "Signup failed");
     }
 
-    const newAccount = {
-      email: pendingEmail,
-      password: newPassword,
-      role: pendingRole,
-      fullName: pendingUserData.fullName || "",
-      yearBatch: pendingUserData.yearBatch,
-      // include any pending data (route, timing, phone etc.)
-      ...pendingUserData,
-    };
+    await fetch(`${BACKEND_URL}/api/otp/send-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: pendingEmail }),
+    });
 
-    registeredAccounts.push(newAccount);
-    localStorage.setItem("campus-commute-accounts", JSON.stringify(registeredAccounts));
+    toast({
+      title: "Account Created",
+      description: "Proceeding to verification",
+    });
 
-    setIsLoading(true);
-    try {
-      const response = await fetch("http://localhost:8000/user/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: pendingEmail }),
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to send OTP email");
-      }
+    navigate("/otp-verification");
 
-      toast({
-        title: "Code Sent",
-        description: "We've sent a verification code to your email.",
-      });
-      navigate("/otp-verification");
-    } catch (err) {
-      // If OTP send fails (backend down, email not deliverable), skip OTP and go directly to success
-      console.warn("OTP send failed, proceeding without verification:", err);
-      toast({
-        title: "Account Created",
-        description: "Welcome to Campus Commute!",
-      });
-      navigate("/success");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  } catch (err: any) {
+    toast({
+      title: "Signup Failed",
+      description: err.message || "Please try again",
+      variant: "destructive",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <MobileLayout>

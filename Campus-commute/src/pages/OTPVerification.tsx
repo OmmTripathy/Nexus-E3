@@ -7,12 +7,14 @@ import FormInput from "@/components/FormInput";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+
 const OTPVerification = () => {
   const navigate = useNavigate();
   const { pendingEmail, setPendingEmail } = useAuth();
   const { toast } = useToast();
   
-  const [otp, setOtp] = useState(["", "", "", ""]);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [resendCount, setResendCount] = useState(3);
   const [showChangeEmail, setShowChangeEmail] = useState(false);
   const [newEmail, setNewEmail] = useState("");
@@ -33,7 +35,7 @@ const OTPVerification = () => {
     newOtp[index] = value;
     setOtp(newOtp);
 
-    if (value && index < 3) {
+    if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
   };
@@ -46,17 +48,17 @@ const OTPVerification = () => {
 
   const handleVerify = async () => {
     const fullOtp = otp.join("");
-    if (fullOtp.length !== 4) {
+    if (fullOtp.length !== 6) {
       toast({
         title: "Invalid OTP",
-        description: "Please enter all 4 digits",
+        description: "Please enter all 6 digits",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      const response = await fetch("http://localhost:8000/user/verify-otp", {
+      const response = await fetch(`${BACKEND_URL}/api/otp/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: pendingEmail, otp: fullOtp }),
@@ -89,7 +91,7 @@ const OTPVerification = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/user/send-otp", {
+      const response = await fetch(`${BACKEND_URL}/api/otp/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: pendingEmail }),
@@ -98,7 +100,7 @@ const OTPVerification = () => {
       if (!response.ok) throw new Error();
 
       setResendCount(resendCount - 1);
-      setOtp(["", "", "", ""]);
+      setOtp(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
       
       toast({
@@ -125,7 +127,7 @@ const OTPVerification = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/user/send-otp", {
+      const response = await fetch(`${BACKEND_URL}/api/otp/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: newEmail }),
@@ -136,7 +138,7 @@ const OTPVerification = () => {
       setPendingEmail(newEmail);
       setNewEmail("");
       setShowChangeEmail(false);
-      setOtp(["", "", "", ""]);
+      setOtp(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
 
       toast({
@@ -194,18 +196,6 @@ const OTPVerification = () => {
                 </button>
               </p>
 
-              <button
-                onClick={() => {
-                  toast({
-                    title: "Verification Skipped",
-                    description: "You can verify your email later from settings.",
-                  });
-                  navigate("/success");
-                }}
-                className="w-full mt-4 py-3 text-sm text-muted-foreground hover:text-foreground border border-dashed border-muted-foreground/30 rounded-full transition-colors"
-              >
-                Skip Verification →
-              </button>
             </>
           ) : (
             <>

@@ -124,23 +124,27 @@ const Login = () => {
           );
         }
 
-        const success = await login(socialEmail, socialPassword, role);
+        localStorage.setItem(
+  "google-user",
+  JSON.stringify({
+    email: socialEmail,
+    fullName: socialName,
+    role,
+    profileImage: googleUser.picture,
+  })
+);
 
-        if (success) {
-          toast({
-            title: `Welcome, ${socialName}!`,
-            description: "Successfully authenticated with Google",
-          });
-          navigate(role === "driver" ? "/driver-home" : "/home");
-        } else {
-          throw new Error("Local login sync failed");
-        }
+toast({
+  title: `Welcome, ${socialName}!`,
+  description: "Successfully authenticated with Google",
+});
+
+navigate(role === "driver" ? "/driver-home" : "/home");
       } catch (err) {
         console.error(err);
         toast({
           title: "Setup Incomplete",
-          description:
-            "Google Authentication failed. Did you add the VITE_GOOGLE_CLIENT_ID?",
+          description: err?.message || "Unknown Google login error",
           variant: "destructive",
         });
       } finally {

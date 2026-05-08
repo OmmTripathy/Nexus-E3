@@ -53,8 +53,11 @@ app.get('/', (req, res) => {
   res.json({ message: 'Campus Commute API is running 🚀' });
 });
 
-const userRouter = require('./routes/userRouter');
-app.use('/user', userRouter);
+const userRoutes = require('./routes/userRouter');
+app.use('/user', userRoutes);
+
+const otpRoutes = require('./routes/otpRouter');
+app.use('/api/otp', otpRoutes);
 
 app.get('/routes', getAllRoutes);
 app.get('/routes/:busId', getRouteByBus);

@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const {register, login, logout, sendOTP, verifyOTP} = require('../controllers/authControllers');
+const {register, login, logout} = require('../controllers/authControllers');
 // const cookieParser = require("cookie-parser");
 router.use(express.json());
 
@@ -12,7 +12,5 @@ router.get("/", (req, res) => {
 router.post("/register", register);
 router.post("/login", login);
 router.post("/logout", logout);
-router.post("/send-otp", sendOTP);
-router.post("/verify-otp", verifyOTP);
 
 module.exports = router;
