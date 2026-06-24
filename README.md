@@ -8,6 +8,14 @@
 **Campus Commute** is a comprehensive, real-time bus tracking and transport management web application designed specifically for college campuses. It bridges the gap between drivers, students, and administrators through a seamless, mobile-first platform, offering live telemetry, accurate ETAs, smart arrival alarms, and a built-in GPS simulation mode for easy testing.
 
 ---
+## 🌐 Live Demo
+
+**Try Campus Commute Live:** https://campus-commute-vrpq.vercel.app/
+
+Experience real-time bus tracking, route simulation, arrival alarms, and role-based dashboards directly in your browser without any local setup.
+
+> **Demo Tip:** Log in using the test credentials below and open separate browser windows for Driver and Student accounts to experience live tracking and GPS simulation in real time.
+---
 
 ## ✨ Key Features
 
